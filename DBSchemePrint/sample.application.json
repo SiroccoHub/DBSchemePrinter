@@ -1,0 +1,10 @@
+﻿{
+  "App": {
+    "DbConnectionString": "Server=(local);Database=SampleDB;Trusted_Connection=True;ConnectRetryCount=5;ConnectRetryInterval=5",
+    "JpNameFilePaths": {
+      "Tables": "tables.tsv",
+      "Columns": "columns.tsv"
+    }
+  } 
+
+}
