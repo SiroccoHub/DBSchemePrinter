@@ -34,14 +34,20 @@ namespace DBSchemePrinter.Domain
 
             if (string.IsNullOrEmpty(outputDirectoryPath))
                 outputDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(), "out");
-                
+
             if (!Directory.Exists(outputDirectoryPath))
             {
                 Logger.Info($"出力フォルダ作成 {outputDirectoryPath}");
                 Directory.CreateDirectory(outputDirectoryPath);
             }
 
-            foreach (var tableGroup in columnInfomations.GroupBy(ci => ci.TableName))
+            var tableGroupedColumnInfomantions = columnInfomations.GroupBy(ci => ci.TableName).ToList();
+
+            Logger.Info($"Markdown作成 !TableList.md");
+            var tableListMarkdown = BuildTableListMarkdown(tableJpNames, tableGroupedColumnInfomantions);
+            await File.WriteAllTextAsync(Path.Combine(outputDirectoryPath, $"!TableList.md"), tableListMarkdown);
+
+            foreach (var tableGroup in tableGroupedColumnInfomantions)
             {
                 Logger.Info($"Markdown作成 {tableGroup.Key}.md");
                 var sb = new StringBuilder();
@@ -88,6 +94,20 @@ namespace DBSchemePrinter.Domain
 
                 await File.WriteAllTextAsync(Path.Combine(outputDirectoryPath, $"{tableGroup.Key}.md"), sb.ToString());
             }
+        }
+
+        private static string BuildTableListMarkdown(List<TableJpName> tableJpNames, List<IGrouping<string, ColumnInfomation>> tableGroupedColumnInfomantions)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine($"# テーブル一覧");
+            sb.AppendLine("| TableName | 概要 |");
+            sb.AppendLine("|--------------|--------------------|");
+            foreach (var tableName in tableGroupedColumnInfomantions.Select(g => g.Key).OrderBy(x => x))
+            {
+                var tableJpName = tableJpNames.FirstOrDefault(x => x.Name == tableName);
+                sb.AppendLine($"| [{tableName}](./{tableName}.md) | {tableJpName?.JpName ?? "-"} |");
+            }
+            return sb.ToString();
         }
 
         private static async Task<List<ColumnInfomation>> GetColumnInfomations(SqlConnection sqlcon)
