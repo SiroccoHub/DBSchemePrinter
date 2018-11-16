@@ -50,49 +50,8 @@ namespace DBSchemePrinter.Domain
             foreach (var tableGroup in tableGroupedColumnInfomantions)
             {
                 Logger.Info($"Markdown作成 {tableGroup.Key}.md");
-                var sb = new StringBuilder();
-
-                var tableJpName = tableJpNames.FirstOrDefault(x => x.Name == tableGroup.Key);
-
-                sb.AppendLine($"# {tableGroup.Key}");
-                sb.AppendLine("## Table Infomation");
-                sb.AppendLine($"{tableJpName?.JpName ?? ""}");
-                sb.AppendLine("");
-
-                sb.AppendLine("## Column");
-                sb.AppendLine("");
-                sb.AppendLine("| フィールドID | 項目名称 | PK | NotNULL | 属性 | サイズ | 初期値 | 項目説明 |");
-                sb.AppendLine("|--------------|----------|----|---------|----------|--------|--------|--------------------|");
-                foreach (var columnInfo in tableGroup)
-                {
-                    var columnJpName =
-                        columnJpNames.FirstOrDefault(x => x.Name == $"{tableGroup.Key}.{columnInfo.ColumnName}");
-                    var isPrimaryKeyString = columnInfo.IsPrimaryKey ? "o" : "";
-                    var isNotNullString = columnInfo.IsNotNull ? "o" : "";
-                    var sizeString = columnInfo.Size.HasValue ? columnInfo.Size.Value.ToString() : "";
-                    sb.AppendLine($"| {columnInfo.ColumnName} | {columnJpName?.JpName} | { isPrimaryKeyString } | {isNotNullString} | {columnInfo.Type} | {sizeString} | {columnInfo.InitialValue} | {columnJpName?.Detail} |");
-                }
-                sb.AppendLine("");
-
-                sb.AppendLine("## Index");
-                sb.AppendLine("");
-
-                var tableIndexInfomations = indexInfomations.Where(x => x.TableName == tableGroup.Key);
-                foreach (var indexGroup in tableIndexInfomations.GroupBy(x => x.IndexName))
-                {
-                    sb.AppendLine($"### {indexGroup.Key}");
-                    sb.AppendLine("");
-                    sb.AppendLine("| フィールドID | 並び順 |");
-                    sb.AppendLine("|--------------|--------|");
-                    foreach (var indexInfomation in indexGroup)
-                    {
-                        var isDescendingKeyString = indexInfomation.IsDescendingKey ? "DESC" : "ASC ";
-                        sb.AppendLine($"| {indexInfomation.ColumnName} | {isDescendingKeyString} |");
-                    }
-                    sb.AppendLine("");
-                }
-
-                await File.WriteAllTextAsync(Path.Combine(outputDirectoryPath, $"{tableGroup.Key}.md"), sb.ToString());
+                var tableInfomationMarkdown = BuildTableInfomationMarkdown(columnJpNames, tableJpNames, indexInfomations, tableGroup);
+                await File.WriteAllTextAsync(Path.Combine(outputDirectoryPath, $"{tableGroup.Key}.md"), tableInfomationMarkdown);
             }
         }
 
@@ -107,6 +66,52 @@ namespace DBSchemePrinter.Domain
                 var tableJpName = tableJpNames.FirstOrDefault(x => x.Name == tableName);
                 sb.AppendLine($"| [{tableName}](./{tableName}.md) | {tableJpName?.JpName ?? "-"} |");
             }
+            return sb.ToString();
+        }
+
+        private static string BuildTableInfomationMarkdown(List<ColumnJpName> columnJpNames, List<TableJpName> tableJpNames, List<IndexInfomation> indexInfomations, IGrouping<string, ColumnInfomation> tableGroup)
+        {
+            var sb = new StringBuilder();
+            var tableJpName = tableJpNames.FirstOrDefault(x => x.Name == tableGroup.Key);
+
+            sb.AppendLine($"# {tableGroup.Key}");
+            sb.AppendLine("## Table Infomation");
+            sb.AppendLine($"{tableJpName?.JpName ?? ""}");
+            sb.AppendLine("");
+
+            sb.AppendLine("## Column");
+            sb.AppendLine("");
+            sb.AppendLine("| フィールドID | 項目名称 | PK | NotNULL | 属性 | サイズ | 初期値 | 項目説明 |");
+            sb.AppendLine("|--------------|----------|----|---------|----------|--------|--------|--------------------|");
+            foreach (var columnInfo in tableGroup)
+            {
+                var columnJpName =
+                    columnJpNames.FirstOrDefault(x => x.Name == $"{tableGroup.Key}.{columnInfo.ColumnName}");
+                var isPrimaryKeyString = columnInfo.IsPrimaryKey ? "o" : "";
+                var isNotNullString = columnInfo.IsNotNull ? "o" : "";
+                var sizeString = columnInfo.Size.HasValue ? columnInfo.Size.Value.ToString() : "";
+                sb.AppendLine($"| {columnInfo.ColumnName} | {columnJpName?.JpName} | { isPrimaryKeyString } | {isNotNullString} | {columnInfo.Type} | {sizeString} | {columnInfo.InitialValue} | {columnJpName?.Detail} |");
+            }
+            sb.AppendLine("");
+
+            sb.AppendLine("## Index");
+            sb.AppendLine("");
+
+            var tableIndexInfomations = indexInfomations.Where(x => x.TableName == tableGroup.Key);
+            foreach (var indexGroup in tableIndexInfomations.GroupBy(x => x.IndexName))
+            {
+                sb.AppendLine($"### {indexGroup.Key}");
+                sb.AppendLine("");
+                sb.AppendLine("| フィールドID | 並び順 |");
+                sb.AppendLine("|--------------|--------|");
+                foreach (var indexInfomation in indexGroup)
+                {
+                    var isDescendingKeyString = indexInfomation.IsDescendingKey ? "DESC" : "ASC ";
+                    sb.AppendLine($"| {indexInfomation.ColumnName} | {isDescendingKeyString} |");
+                }
+                sb.AppendLine("");
+            }
+
             return sb.ToString();
         }
 
