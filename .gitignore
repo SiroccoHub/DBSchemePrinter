@@ -330,3 +330,5 @@ ASALocalRun/
 .mfractor/
 
 DBSchemePrinter/application\.json
+columns.tsv
+tables.tsv
