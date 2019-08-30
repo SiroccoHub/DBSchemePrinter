@@ -1,8 +1,8 @@
-function main()
+ï»¿function main()
 {
     cd $PSScriptRoot
 
-    $excelFile = (Get-Item .\JLWŠîŠ²ƒVƒXƒeƒ€ƒe[ƒuƒ‹’è‹`.xlsx).FullName
+    $excelFile = (Get-Item .\JLWåŸºå¹¹ã‚·ã‚¹ãƒ†ãƒ ãƒ†ãƒ¼ãƒ–ãƒ«å®šç¾©.xlsm).FullName
     $datetimeFormat = 'yyyy/MM/dd HH:mm:ss'
 
     try {
@@ -13,8 +13,8 @@ function main()
         $book = $excel.Workbooks.Open($excelFile)
         $indexSheet = $book.Sheets.Item("Index")
     
-        ## ƒe[ƒuƒ‹‚ÌŠJİ‚ğæ“¾
-        Write-Host ('[{0}] ƒe[ƒuƒ‹î•ñæ“¾ŠJn' -f (Get-Date -Format $datetimeFormat))
+        ## ãƒ†ãƒ¼ãƒ–ãƒ«ã®é–‹è¨­ã‚’å–å¾—
+        Write-Host ('[{0}] ãƒ†ãƒ¼ãƒ–ãƒ«æƒ…å ±å–å¾—é–‹å§‹' -f (Get-Date -Format $datetimeFormat))
         $row = 2
         $tables = @()
         #<#
@@ -27,21 +27,21 @@ function main()
             $tables += ([PSCustomObject]@{Name = $indexSheet.Cells.Item($row,2).Text; Detail = $indexSheet.Cells.Item($row,3).Text})
             $row++
         }
-        Write-Host ('[{0}] ƒe[ƒuƒ‹î•ñæ“¾I—¹' -f (Get-Date -Format $datetimeFormat))
+        Write-Host ('[{0}] ãƒ†ãƒ¼ãƒ–ãƒ«æƒ…å ±å–å¾—çµ‚äº†' -f (Get-Date -Format $datetimeFormat))
 
-        Write-Host ('[{0}] ƒe[ƒuƒ‹î•ño—ÍŠJn' -f (Get-Date -Format $datetimeFormat))
+        Write-Host ('[{0}] ãƒ†ãƒ¼ãƒ–ãƒ«æƒ…å ±å‡ºåŠ›é–‹å§‹' -f (Get-Date -Format $datetimeFormat))
         $tables | select Name, Detail | Export-Csv -Delimiter "`t" -Path .\tables.tsv -Force -Encoding utf8 -NoTypeInformation
-        Write-Host ('[{0}] ƒe[ƒuƒ‹î•ño—ÍI—¹' -f (Get-Date -Format $datetimeFormat))
+        Write-Host ('[{0}] ãƒ†ãƒ¼ãƒ–ãƒ«æƒ…å ±å‡ºåŠ›çµ‚äº†' -f (Get-Date -Format $datetimeFormat))
         #>
 
         $columns = @()
-        Write-Host ('[{0}] ƒJƒ‰ƒ€î•ñæ“¾ŠJn' -f (Get-Date -Format $datetimeFormat))
+        Write-Host ('[{0}] ã‚«ãƒ©ãƒ æƒ…å ±å–å¾—é–‹å§‹' -f (Get-Date -Format $datetimeFormat))
         $book.Worksheets | where {$s = $_; $tables.Where({$s.Name -eq $_.Name},'First').Count -gt 0} | foreach {
             $sheet = $_
             Write-Host ('[{0}] {1}' -f (Get-Date -Format $datetimeFormat), $sheet.Name)
 
             $row = 5
-            if($sheet.Cells.Item($row - 1,1).Text -ne '‡‚') {
+            if($sheet.Cells.Item($row - 1,1).Text -ne 'â„–') {
                 $row = 4
             }
             while(1) {
@@ -62,10 +62,10 @@ function main()
                 $row++
             }
         }
-        Write-Host ('[{0}] ƒJƒ‰ƒ€î•ñæ“¾I—¹' -f (Get-Date -Format $datetimeFormat))
-        Write-Host ('[{0}] ƒJƒ‰ƒ€î•ño—ÍŠJn' -f (Get-Date -Format $datetimeFormat))
+        Write-Host ('[{0}] ã‚«ãƒ©ãƒ æƒ…å ±å–å¾—çµ‚äº†' -f (Get-Date -Format $datetimeFormat))
+        Write-Host ('[{0}] ã‚«ãƒ©ãƒ æƒ…å ±å‡ºåŠ›é–‹å§‹' -f (Get-Date -Format $datetimeFormat))
         $columns | select Name, JPName, Detail | Export-Csv -Delimiter "`t" -Path .\columns.tsv -Force -Encoding utf8 -NoTypeInformation
-        Write-Host ('[{0}] ƒJƒ‰ƒ€î•ño—ÍI—¹' -f (Get-Date -Format $datetimeFormat))
+        Write-Host ('[{0}] ã‚«ãƒ©ãƒ æƒ…å ±å‡ºåŠ›çµ‚äº†' -f (Get-Date -Format $datetimeFormat))
 
         $book.Close()
         $excel.Quit()    
