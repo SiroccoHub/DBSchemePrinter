@@ -90,7 +90,7 @@ namespace DBSchemePrinter.Domain
                 var isPrimaryKeyString = columnInfo.IsPrimaryKey ? "o" : "";
                 var isNotNullString = columnInfo.IsNotNull ? "o" : "";
                 var sizeString = columnInfo.Size.HasValue ? columnInfo.Size.Value.ToString() : "";
-                sb.AppendLine($"| {columnInfo.ColumnName} | {columnJpName?.JpName} | { isPrimaryKeyString } | {isNotNullString} | {columnInfo.Type} | {sizeString} | {columnInfo.InitialValue} | {columnJpName?.Detail} |");
+                sb.AppendLine($"| {columnInfo.ColumnName} | {columnJpName?.JpName} | {isPrimaryKeyString} | {isNotNullString} | {columnInfo.Type} | {sizeString} | {columnInfo.InitialValue} | {columnJpName?.Detail} |");
             }
             sb.AppendLine("");
 
@@ -141,7 +141,7 @@ namespace DBSchemePrinter.Domain
                         TABLE_NAME in (select name from sys.objects where type = 'U')
                      order by
                        TABLE_NAME, ORDINAL_POSITION"
-                ,commandTimeout:0)).ToList();
+                , commandTimeout: 0)).ToList();
         }
 
         private static async Task<List<IndexInfomation>> GetIndexInfomations(SqlConnection sqlcon)
@@ -158,6 +158,7 @@ namespace DBSchemePrinter.Domain
                          join sys.tables t on t.object_id = ic.object_id
                          join sys.columns c on c.object_id = t.object_id and c.column_id = ic.column_id
                          join sys.indexes i on i.object_id = t.object_id and i.index_id = ic.index_id
+                     where i.is_hypothetical = 0
                      order by t.name, i.name, ic.index_column_id"
                 , commandTimeout: 0)).ToList();
         }
